@@ -4,33 +4,33 @@ Production: https://login.salesforce.com/packaging/installPackage.apexp?p0=04t7F
 Sandbox: https://test.salesforce.com/packaging/installPackage.apexp?p0=04t7F000005EwuV
 Source code: https://github.com/danhowellnz/Flow-Action---Get-collection
 
-# How to use
+**How to use**
 - Add an “action” to your flow and search for “Get Collection as SObject”-
 -Select the object type
 
 
-# FieldApiINames
+**FieldApiINames**
 Comma separated list of field API names.
 eg.ID,Name,Primary_contact__c
 
 
-# WhereClause
+**WhereClause**
 A text value defining the where clause. You must not SOQL to add this. You should be able to add nested statements and do fun advance things here like normal apex.
 eg.createddate = Last_N_Years:2
 
-# sObjectName
+**sObjectName**
 The name of the Object
 eg. Account
 
-# IdsList
+**IdsList**
 You load a number of Ids into this variable and then it will return all of these. This uses the Id IN :IdsList ability in Apex to find them all in one go.
 Must be a text varilbe and allow multiple must be checked. 
 
-# BypassSharing
+**BypassSharing**
 We used this for checking for duplicate records before inserting. Or if you want to move a contact to an account that the user doesn’t have access yet.
 eg. {!$GlobalConstant.True}
 
-# outputCollection
+**outputCollection**
 The records being returned
 Create a record variable -Allow multiple must be checked. 
 
