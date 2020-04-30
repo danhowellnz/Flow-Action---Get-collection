@@ -2,7 +2,7 @@
 
 **What does it do?**
 
-It’s a new flow action to make the most of generic Sobjects :)
+It’s a new flow action that allows you to use SOQL or SOSL to find records. That means you can start using nested SOQL statements, or leverage Salesforce's fuzzy search logic from SOSL. 
 
 It can use
 - Dynamic where clauses - define as text
