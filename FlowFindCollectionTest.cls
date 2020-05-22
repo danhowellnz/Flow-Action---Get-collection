@@ -61,4 +61,56 @@ public with sharing class FlowFindCollectionTest {
 
         //Test IDS
 
+
+
+        @IsTest
+        static void testSearch() {
+            List<Account> accounts = new List<Account>{
+                new Account(Name='United 1'),
+                new Account(Name='United 2'),
+                new Account(Name='United 3', Type='Test')
+            };
+            insert accounts;
+            FlowFindCollection.Requests request = new FlowFindCollection.Requests();
+            request.sObjectName = 'Account';
+            request.queries = 'United';
+            request.scope = 'ALL FIELDS';
+            request.whereClause = 'Type = \'Test\'';
+            request.FieldApiINames = '*';
+            request.SearchExtraObjects = 'Lead,Account';
+            Test.setFixedSearchResults(new Id[]{accounts[2].Id});
+            Test.startTest();
+            List<FlowFindCollection.Results> results = FlowFindCollection.execute(
+                new List<FlowFindCollection.Requests>{ request }
+            );
+            Test.stopTest();
+            System.assertEquals(3, [SELECT COUNT() FROM Account], 'Expected to have 3 accounts');
+            System.assertEquals(1, results.size(), 'Expected only 1 result collection returned');
+        }
+
+        
+        @IsTest
+        static void testSearch_withousharing() {
+            List<Account> accounts = new List<Account>{
+                new Account(Name='United 1'),
+                new Account(Name='United 2'),
+                new Account(Name='United 3', Type='Test')
+            };
+            insert accounts;
+            FlowFindCollection.Requests request = new FlowFindCollection.Requests();
+            request.sObjectName = 'Account';
+            request.queries = 'United';
+            request.scope = 'ALL FIELDS';
+            request.whereClause = 'Type = \'Test\'';
+            request.BypassSharing		=true;
+            request.FieldApiINames = 'Name';
+            Test.setFixedSearchResults(new Id[]{accounts[2].Id});
+            Test.startTest();
+            List<FlowFindCollection.Results> results = FlowFindCollection.execute(
+                new List<FlowFindCollection.Requests>{ request }
+            );
+            Test.stopTest();
+            System.assertEquals(3, [SELECT COUNT() FROM Account], 'Expected to have 3 accounts');
+            System.assertEquals(1, results.size(), 'Expected only 1 result collection returned');
+        }
 }

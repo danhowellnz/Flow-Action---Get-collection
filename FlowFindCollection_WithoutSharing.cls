@@ -3,6 +3,7 @@ public without sharing class FlowFindCollection_WithoutSharing {
         system.debug('FlowFindCollection_WithoutSharing');
         return Database.query(soql);
     }
+    public static List<List<SObject>> FlowSearchCollection_WithoutSharing(string sosl) {
+        return Search.query(sosl);
+    }    
 }
-
-
