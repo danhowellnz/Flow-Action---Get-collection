@@ -9,7 +9,12 @@
     max-width: 800px;
 }
 .THIS .slds-dropdown_fluid{
-        min-height: 40px;
+    min-height: 35px;
+}
+.THIS .slds-spinner{
+    min-height: 40px;
+    position: relative;
+    display:block;
 }
 .THIS button.slds-button.slds-button_brand {
     margin: 10px 0px;

@@ -14,7 +14,7 @@
         let searchString = event.target.value;
         
         if (searchString.length >= 3) {
-            component.set("v.openDropDown", true);
+            
 
             //Ensure that not many function execution happens if user keeps typing
             if (component.get("v.inputSearchFunction")) {

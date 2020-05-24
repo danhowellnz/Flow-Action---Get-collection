@@ -39,6 +39,8 @@
                 component.set("v.results", results);
                 if(serverResult.length>0){
                     component.set("v.openDropDown", true);
+                }else{
+                    component.set("v.openDropDown", false);
                 }
             } else{
                 var toastEvent = $A.get("e.force:showToast");

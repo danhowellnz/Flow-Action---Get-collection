@@ -90,8 +90,9 @@
         </div>
     </div>
 
-    <lightning:button disabled="{!  empty(v.recordId) || empty(v.InputFieldAPIName) || empty(v.selectedOption)  }" value="Save" onclick="{!c.saveResultTrigger}" label="Save" variant="brand" iconName="utility:download" iconPosition="left"  />
-
+    <aura:if isTrue="{! !empty(v.recordId)}">
+        <lightning:button  disabled="{!  empty(v.recordId) || empty(v.InputFieldAPIName) || empty(v.selectedOption)  }" value="Save" onclick="{!c.saveResultTrigger}" label="Save" variant="brand" iconName="utility:download" iconPosition="left"  />
+    </aura:if>
 
     </lightning:card>
 
