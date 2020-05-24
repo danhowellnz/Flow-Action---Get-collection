@@ -1,0 +1,26 @@
+.THIS .iconClass {
+    margin-right:10px;
+}
+.THIS .slds-media__body{
+    font-size: 0.8rem;
+    margin-top:0.4rem;
+}
+.THIS .slds-combobox_container, .THIS .slds-dropdown_fluid {
+    max-width: 800px;
+}
+.THIS .slds-dropdown_fluid{
+        min-height: 40px;
+}
+.THIS button.slds-button.slds-button_brand {
+    margin: 10px 0px;
+}
+.THIS label.slds-form-element__label {
+    font-size: 0.8rem;
+    margin-bottom: 5px;
+}
+.THIS.CardPadding {
+    padding: 0px 20px;
+}
+.THIS header.slds-card__header.slds-grid {
+    display: none;
+}

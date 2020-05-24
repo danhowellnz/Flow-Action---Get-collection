@@ -1,0 +1,15 @@
+<design:component  label="Global Lookup">
+
+    <design:attribute name = "label" label="label" />
+    <design:attribute name = "objectApiName" label="objectApiName" required="true" />
+    <design:attribute name = "valueFieldApiName" label="Field to show in search (api name)" />
+    <design:attribute name = "extendedWhereClause" label="WhereClause" />
+    <design:attribute name = "maxRecords" label="Max Number of Results To Show" />
+    <design:attribute name = "extraObjects" label="Extra Objects - comma seperated list" />
+    <design:attribute name = "SearchScope" label="Search Scope: ALL FIELDS, NAME FIELDS, EMAIL FIELDS, PHONE FIELDS"  />
+    <design:attribute name = "selectedOption" label="Output: RecordId" />
+
+    <design:attribute name = "QueryType" label="Search or Select" />
+    <design:attribute name = "InputFieldAPIName" label="Save Only: Field API Name to Save Result To" />
+
+</design:component>

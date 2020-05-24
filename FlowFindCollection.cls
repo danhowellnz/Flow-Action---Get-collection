@@ -29,6 +29,9 @@ public class Requests {
     @InvocableVariable(label='8.Search Extra Objects for Ids eg. Account,Opportunity,Case,Lead,User' description='eg. Account or custom__c' required=false)
     public string SearchExtraObjects;
 
+    @InvocableVariable(label='9.Max Number of records' description='eg. Account or custom__c' required=false)
+    public Integer WhereLimit;
+
 } 
 
 
@@ -52,11 +55,18 @@ public class Results {
 
     //Start loop
      for ( Requests request : requests ) {
+        if(string.isnotblank(request.queries)){
+            request.queries = String.escapeSingleQuotes(request.queries);
+            request.queries = request.queries.replaceAll(':', '');
+        } 
+
         //Vars
+        request.WhereLimit = request.WhereLimit == null ? 1000 : request.WhereLimit;
         List<Id> ListOfIds = request.IdsList;
         Results response = new Results();
         response.outputCollection = new list<SObject>();
         response.outputIds = new list<Id>();
+        response.outputRecordNames = new list<string>();
 
 
         //SELECT
@@ -73,6 +83,7 @@ public class Results {
             
             //Where not blank so add in WHERE
             WhereClause = WhereClause == '' ? '' :  ' WHERE '+WhereClause; 
+            WhereClause += ' LIMIT '+request.WhereLimit;
             string selectClause =  fieldAPINames_commaSepereated;
   
             //create soql string
@@ -88,9 +99,16 @@ public class Results {
                 //No sharing
                 response.outputCollection =  Database.query(soql);
             }
-            //Save all Ids
-            Set<Id> Uniqueids = (new Map<Id,Sobject>(response.outputCollection)).keySet().clone();
-            response.outputIds.addAll(Uniqueids);
+            //Save all Ids and Names
+            string nameField =  getNameUniqueField(request.sObjectName).toLowerCase();
+            for(sobject each : response.outputCollection ){
+                response.outputIds.add(each.id);
+                string recordName = each.get(nameField)+'';
+                response.outputRecordNames.add(recordName);
+            }
+
+            //Set<Id> Uniqueids = (new Map<Id,Sobject>(response.outputCollection)).keySet().clone();
+            //response.outputIds.addAll(Uniqueids);
 
             
             //system.debug(response.outputCollection);
@@ -118,7 +136,7 @@ public class Results {
 }    
 
 
-   private static results Execute_Search (Requests request){
+    public static results Execute_Search (Requests request){
             string fieldAPINames_commaSepereated = getfieldAPINames_commaSepereated(request.FieldApiINames, request.sObjectName);
             Results response = new Results();
             response.outputCollection = new list<SObject>();
@@ -130,10 +148,9 @@ public class Results {
 
             //If no quotes added
             if( !queryString.contains('\'') && !queryString.contains('\"')){
-                queryString = '"'+queryString+'"';
+                queryString = '"*'+queryString+'*"';
             }
-        
-            System.debug('FlowFindCollection__execute queryString >>>'+queryString);
+
 
             //if has extra objects to saerch - get the name and id
             string ExtraObjects ='';
@@ -146,8 +163,8 @@ public class Results {
                     SObjectType ObjectType = Schema.getGlobalDescribe().get(EachObject);
                     Map<String,Schema.SObjectField> mfields = ObjectType.getDescribe().fields.getMap();
 
-                    string NameField = getNameUniqueField(ObjectType).toLowerCase();
-                    system.debug('FlowFindCollection__ExtraObject >>>'+EachObject+' | '+NameField);
+                    string NameField = getNameUniqueField(EachObject).toLowerCase();
+                    //system.debug('FlowFindCollection__ExtraObject >>>'+EachObject+' | '+NameField);
                     ObjectNameMap.put(EachObject.toLowerCase(), NameField);
 
                     ExtraObjects += EachObject;
@@ -157,14 +174,13 @@ public class Results {
                 }
                 ExtraObjects = ExtraObjects.removeEnd(',');
             }
-            //Add lookup object
-            SObjectType ObjectType = Schema.getGlobalDescribe().get(request.sObjectName);
-            string NameField = getNameUniqueField(ObjectType).toLowerCase();
+            //Add lookup object to the map - it isn't in the extra objects
+            string NameField = getNameUniqueField(request.sObjectName).toLowerCase();
             ObjectNameMap.put(request.sObjectName.toLowerCase(), NameField);
            
 
 
-            System.debug(ObjectNameMap);
+            //System.debug(ObjectNameMap);
 
             // Build SOSL
             String sosl  = 'FIND {'+queryString+'}';
@@ -174,6 +190,7 @@ public class Results {
             sosl  += String.isNotBlank(request.whereClause) ? ' WHERE ' + request.whereClause : '';
             sosl  +=')';
             sosl  += String.isNotBlank(ExtraObjects) ? ','+ExtraObjects: '';
+            sosl  += ' LIMIT '+request.WhereLimit;
 
 
             System.debug('FlowFindCollection__execute sosl >>>'+sosl);
@@ -185,7 +202,6 @@ public class Results {
                 searchList = FlowFindCollection_WithoutSharing.FlowSearchCollection_WithoutSharing(sosl);
             }
             else{
-                //searchResults = Search.find(sosl);
                 searchList = search.query(sosl);
             }
 
@@ -228,6 +244,7 @@ public class Results {
 
     private static string getfieldAPINames_commaSepereated(string FieldApiINames, string sObjectName){
         string fieldAPINames_commaSepereated = '';
+
         //Generate fields to find
         if(FieldApiINames.contains('*') ){  //If has * get all fields
             SObjectType ObjectType1 = Schema.getGlobalDescribe().get(sObjectName);
@@ -239,32 +256,37 @@ public class Results {
         }
         else{
             //add ID field to apinames if missing
-            FieldApiINames = string.isBlank(FieldApiINames) ? 'id' : FieldApiINames;
-                fieldAPINames_commaSepereated =  FieldApiINames.containsIgnoreCase('id') ?  FieldApiINames : ' Id,'+ FieldApiINames ;
+            fieldAPINames_commaSepereated = string.isBlank(FieldApiINames) ? 'id' : FieldApiINames;
+            fieldAPINames_commaSepereated =  fieldAPINames_commaSepereated.containsIgnoreCase('id') ?  fieldAPINames_commaSepereated : ' Id,'+ fieldAPINames_commaSepereated ;
+            //Add name field if missing
+            string NameField = getNameUniqueField(sObjectName).toLowerCase();
+            fieldAPINames_commaSepereated =  fieldAPINames_commaSepereated.containsIgnoreCase(NameField) ?  fieldAPINames_commaSepereated : NameField+','+ fieldAPINames_commaSepereated ;
+
         }
         return fieldAPINames_commaSepereated;
     }
 
 
-    private static String getNameUniqueField(Schema.sObjectType objType){
+    private static String getNameUniqueField(string sObjectName){
+        SObjectType objType = Schema.getGlobalDescribe().get(sObjectName);
         Schema.DescribeSObjectResult ObjResult =  objType.getDescribe();
         Map<String, Schema.SObjectField> mapFields = ObjResult.Fields.getMap();
+
+        //Some manual overrides
+        if(sObjectName.toLowerCase() == 'emailmessage') return 'subject';
+
         for(Schema.SObjectField objField : mapFields.values() ){
             if(objField.getDescribe().isNameField()){
                 return objField.getDescribe().getName();
             }
             if(objField.getDescribe().isAutoNumber()){
                 return objField.getDescribe().getName();
-
             }
             if(objField.getDescribe().isUnique()){
                 return objField.getDescribe().getName();
-
             }
         }
-        
         return 'Name';
-
     }
 
 
