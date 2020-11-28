@@ -59,7 +59,10 @@ public class Results {
             request.queries = String.escapeSingleQuotes(request.queries);
             request.queries = request.queries.replaceAll(':', '');
         } 
-
+        if(string.isnotblank(request.sObjectName)){
+            request.sObjectName = request.sObjectName.trim();
+        }
+        
         //Vars
         request.WhereLimit = request.WhereLimit == null ? 1000 : request.WhereLimit;
         List<Id> ListOfIds = request.IdsList;
@@ -72,20 +75,29 @@ public class Results {
         //SELECT
         if( string.isblank(request.queries) ){
             string fieldAPINames_commaSepereated = getfieldAPINames_commaSepereated(request.FieldApiINames, request.sObjectName);
-      
+           
             string WhereClause = '';
-            WhereClause += request.WhereClause == null ? '' : request.WhereClause;
+           
             //Has IN LISt
             if(request.IdsList!=null){
-                WhereClause += request.WhereClause == null ? '' : ' AND ';
-                WhereClause +=  ' Id IN :ListOfIds';
+                WhereClause +=  ' Id IN :ListOfIds';  
             }
-            
+
+            //Add where 
+            if(string.isNotBlank(request.WhereClause)){
+                system.debug('request.WhereClause: '+request.WhereClause);
+                if(WhereClause != ''){
+                    WhereClause += ' AND ';
+                }
+                WhereClause +=  request.WhereClause;
+            }
+
             //Where not blank so add in WHERE
             WhereClause = WhereClause == '' ? '' :  ' WHERE '+WhereClause; 
+
+            //Add limit
             WhereClause += ' LIMIT '+request.WhereLimit;
             string selectClause =  fieldAPINames_commaSepereated;
-  
             //create soql string
             string soql =  'SELECT '+selectClause+' FROM '+request.sObjectName+' '+WhereClause;
             system.debug('FlowFindCollectiong____'+soql);
@@ -100,10 +112,17 @@ public class Results {
                 response.outputCollection =  Database.query(soql);
             }
             //Save all Ids and Names
-            string nameField =  getNameUniqueField(request.sObjectName).toLowerCase();
+            string nameField =  getNameUniqueField(request.sObjectName);
+
+             nameField =  nameField == null ? '' : nameField.toLowerCase();
+             system.debug('Select nameField: '+nameField);
             for(sobject each : response.outputCollection ){
                 response.outputIds.add(each.id);
-                string recordName = each.get(nameField)+'';
+                string recordName ='';
+                if(string.isNotBlank(nameField)){
+                    try{ recordName = each.get(nameField)+'';}
+                    catch (exception e){System.debug('Cant find name field: '+e);}
+                } 
                 response.outputRecordNames.add(recordName);
             }
 
@@ -147,9 +166,9 @@ public class Results {
             String queryString = request.queries.replaceAll('\'', '"');
 
             //If no quotes added
-            if( !queryString.contains('\'') && !queryString.contains('\"')){
+           /* if( !queryString.contains('\'') && !queryString.contains('\"')){
                 queryString = '"*'+queryString+'*"';
-            }
+            }*/
 
 
             //if has extra objects to saerch - get the name and id
@@ -175,8 +194,12 @@ public class Results {
                 ExtraObjects = ExtraObjects.removeEnd(',');
             }
             //Add lookup object to the map - it isn't in the extra objects
-            string NameField = getNameUniqueField(request.sObjectName).toLowerCase();
-            ObjectNameMap.put(request.sObjectName.toLowerCase(), NameField);
+            string NameField = getNameUniqueField(request.sObjectName);
+            if(string.isNotblank(NameField)){
+                ObjectNameMap.put(request.sObjectName.toLowerCase(), NameField.toLowerCase());
+            }
+            
+            
            
 
 
@@ -243,27 +266,40 @@ public class Results {
 //UTILITIES
 
     private static string getfieldAPINames_commaSepereated(string FieldApiINames, string sObjectName){
-        string fieldAPINames_commaSepereated = '';
+        string fieldAPINames_commaSeperated = '';
+        FieldApiINames = FieldApiINames == null ? '' : FieldApiINames;
 
         //Generate fields to find
         if(FieldApiINames.contains('*') ){  //If has * get all fields
             SObjectType ObjectType1 = Schema.getGlobalDescribe().get(sObjectName);
             Map<String,Schema.SObjectField> mfields1 = ObjectType1.getDescribe().fields.getMap();
             for (String SObjectField : mfields1.keySet()){
-                fieldAPINames_commaSepereated += SObjectField+',';
+                fieldAPINames_commaSeperated += SObjectField+',';
             }
-            fieldAPINames_commaSepereated = fieldAPINames_commaSepereated.removeEnd(',');
+            fieldAPINames_commaSeperated = fieldAPINames_commaSeperated.removeEnd(',');
         }
         else{
             //add ID field to apinames if missing
-            fieldAPINames_commaSepereated = string.isBlank(FieldApiINames) ? 'id' : FieldApiINames;
-            fieldAPINames_commaSepereated =  fieldAPINames_commaSepereated.containsIgnoreCase('id') ?  fieldAPINames_commaSepereated : ' Id,'+ fieldAPINames_commaSepereated ;
-            //Add name field if missing
-            string NameField = getNameUniqueField(sObjectName).toLowerCase();
-            fieldAPINames_commaSepereated =  fieldAPINames_commaSepereated.containsIgnoreCase(NameField) ?  fieldAPINames_commaSepereated : NameField+','+ fieldAPINames_commaSepereated ;
+            fieldAPINames_commaSeperated = string.isBlank(FieldApiINames) ? 'id' : FieldApiINames;
+            fieldAPINames_commaSeperated += ', '; //add commas to help with finidng name fields below
+            if( !fieldAPINames_commaSeperated.containsIgnoreCase('id,') && !fieldAPINames_commaSeperated.containsIgnoreCase('id,') ){
+                fieldAPINames_commaSeperated = ' Id,'+ fieldAPINames_commaSeperated ;
+            }
 
-        }
-        return fieldAPINames_commaSepereated;
+            //Add name field if missing
+            string NameField = getNameUniqueField(sObjectName);
+            NameField = NameField == null ? '' : NameField.toLowerCase();
+            system.debug('fieldAPINames_commaSeperated: '+fieldAPINames_commaSeperated);
+            system.debug('fieldAPINames_commaSeperated nameField: '+nameField);
+            
+            if( !fieldAPINames_commaSeperated.containsIgnoreCase(NameField+',') && !fieldAPINames_commaSeperated.containsIgnoreCase(','+NameField) ){
+                system.debug('fieldAPINames_commaSeperated adding nameField to query');
+                fieldAPINames_commaSeperated = NameField+', '+ fieldAPINames_commaSeperated ;
+            }
+            fieldAPINames_commaSeperated = fieldAPINames_commaSeperated.trim().removeEnd(',');
+            system.debug('fieldAPINames_commaSeperated: '+fieldAPINames_commaSeperated);
+         }
+        return fieldAPINames_commaSeperated;
     }
 
 
@@ -276,17 +312,19 @@ public class Results {
         if(sObjectName.toLowerCase() == 'emailmessage') return 'subject';
 
         for(Schema.SObjectField objField : mapFields.values() ){
-            if(objField.getDescribe().isNameField()){
-                return objField.getDescribe().getName();
+            Schema.DescribeFieldResult objFieldDescribe =  objField.getDescribe();
+            
+            if(objFieldDescribe.isNameField()){
+                return objFieldDescribe.getName();
             }
-            if(objField.getDescribe().isAutoNumber()){
-                return objField.getDescribe().getName();
+            if(objFieldDescribe.isAutoNumber()){
+                return objFieldDescribe.getName();
             }
-            if(objField.getDescribe().isUnique()){
-                return objField.getDescribe().getName();
+            if(objFieldDescribe.isUnique()){
+                return objFieldDescribe.getName();
             }
         }
-        return 'Name';
+        return null;
     }
 
 

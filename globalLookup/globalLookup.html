@@ -1,0 +1,66 @@
+<template>
+    <lightning-card class={cardStyle}><div class={cardStyle}>
+
+    <div class="slds-form-element" >
+        <label onclick={closeLookup} class="slds-form-element__label" for="combobox-id-21"
+            style={labelClass} >{label}</label>
+        <div class="slds-form-element__control">
+            <div class="slds-combobox_container"  >
+                <div class={classValueCombo}
+                    aria-expanded="true" aria-haspopup="listbox" role="combobox">
+                    <div class="slds-combobox__form-element slds-input-has-icon slds-input-has-icon_right" role="none">
+                        <input type="text"
+                            class="slds-input slds-combobox__input slds-combobox__input-value"
+                            id="combobox-id-21" aria-autocomplete="list" aria-controls="listbox-id-11"
+                            autocomplete="off" onkeyup={searchHandler} onfocus={searchHandlerFocus}   role="textbox" placeholder="Search..."
+                            value={inputValue} />
+                        <template if:true={ShowSearchIcon}>
+                                <span
+                                    class="slds-button slds-button_icon slds-input__icon slds-input__icon_right">
+                                    <lightning-icon class="btnIconOverlay" icon-name="utility:search" size="x-small">
+                                        </lightning-icon>
+                                </span>
+                        </template>
+                        <template if:false={ShowSearchIcon}>
+                                <button class="slds-button slds-button_icon slds-input__icon slds-input__icon_right"
+                                    title="Clear the text input" onclick={clearOption}>
+                                    <lightning-icon class="btnIconOverlay" icon-name="utility:clear" size="x-small"></lightning-icon>
+                                </button>
+                        </template>
+                    </div>
+                    <div id="listbox-id-11" class="slds-dropdown slds-dropdown_length-5 slds-dropdown_fluid"
+                        role="listbox">
+                        <template if:true={loading}>
+                                <lightning-spinner alternativetext="Loading" size="small" alternative-text="Loading"></lightning-spinner>
+                        </template>
+                        <ul class="slds-listbox slds-listbox_vertical" role="presentation">
+                            <template for:each={results} for:item="result">
+                                <li key={result} role="presentation" class="slds-listbox__item" data-id={result.id}
+                                    data-value={result.Displayvalue} onclick={optionClickHandler}>
+                                    <div id={result.id}
+                                        class="slds-media slds-listbox__option slds-listbox__option_plain slds-media_small"
+                                        role="option">
+                                        <!--<lightning-icon iconname={result.IconName} alternativetext={result.ObjectName} title={result.ObjectName} class='iconClass' ></lightning-icon>-->
+                                        <lightning-icon alternativetext={result.ObjectName} title={result.ObjectName} class='iconClass' icon-name={result.IconName}>
+                                            </lightning-icon>
+                                        <span class="slds-media__body">
+                                            <span class="slds-truncate" title="All">
+                                                <span>{result.Displayvalue}</span>
+                                            </span>
+                                        </span>
+                                    </div>
+                                </li>
+                            </template>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <br/>
+    <template if:true={showSavebutton}>
+        
+            <lightning-button  disabled={buttonDisabled} value="Save" onclick={saveResultTrigger} label="Save" variant="brand" icon-name="utility:download" icon-position="left"  class="saveButton" ></lightning-button>
+    </template>
+</div></lightning-card>
+</template>

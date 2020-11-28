@@ -1,10 +1,9 @@
-  
-public with sharing class AutoCompleteController {
+public class AutoCompleteController {
     @AuraEnabled(cacheable=true)
-    public static List<ResultssObject> getRecords(String searchString, String objectApiName,  String valueFieldApiName, String extendedWhereClause, Integer maxRecords, String extraObjects, String SearchScope, string QueryType){
+    public static List<ResultssObject> getRecords(String searchString, String objectApiName,  String valueFieldApiName, String extendedWhereClause, Integer maxRecords, String extraObjects, String SearchScope, string QueryType, boolean Bypasssharing){
         searchString = String.escapeSingleQuotes(searchString);
-        objectApiName = String.escapeSingleQuotes(objectApiName);
-        valueFieldApiName = String.escapeSingleQuotes(valueFieldApiName);
+        if(string.isnotblank(objectApiName)) objectApiName = String.escapeSingleQuotes(objectApiName);
+        if(string.isnotblank(valueFieldApiName)) valueFieldApiName = String.escapeSingleQuotes(valueFieldApiName);
         if( string.isblank(QueryType)) QueryType = 'search';
 
         FlowFindCollection.Requests request = new FlowFindCollection.Requests();
@@ -15,15 +14,43 @@ public with sharing class AutoCompleteController {
             request.FieldApiINames = valueFieldApiName;
             request.WhereLimit = maxRecords;
             request.SearchExtraObjects = extraObjects;
+
+
+            if(Bypasssharing== true){ 
+                request.BypassSharing = Bypasssharing;
+            }
+
+
+
+            //Add the searchString where statement
+            if(QueryType.toLowerCase() =='select'){
+                request.whereClause = ' '+valueFieldApiName+'  like\'%'+searchString+'%\'';
+                if( string.isNotBlank(extendedWhereClause)) request.whereClause += ' AND '+extendedWhereClause; 
+                
+            }
+
+            //if searching on an id value
+            if( searchString != null && (searchString.length() ==15 || searchString.length() == 18) ){
+                try{
+                    id recordid = id.valueOf(searchString);
+                    request.whereClause = ' id = \''+searchString+'\' ';
+                    if( string.isNotBlank(extendedWhereClause)) request.whereClause += ' AND '+extendedWhereClause; 
+                    request.queries = null;
+                }
+                catch( Exception e){}
+
+            }
+
+
             system.debug('AutoCompleteController request');
             system.debug(request);
-
             List<FlowFindCollection.Results> results = FlowFindCollection.execute(
                 new List<FlowFindCollection.Requests>{ request }
             );
             
-            system.debug('AutoCompleteController results');
-            system.debug(results);
+            
+
+
 
 
         list<Id> outputIds = results[0].outputIds;
@@ -33,8 +60,15 @@ public with sharing class AutoCompleteController {
         //add Collection results to a map - to add the value name
         Map<id,string> IdValueMap = new Map<id,string>();
 
+        system.debug('AutoCompleteController results');
+        system.debug(outputIds);
+        system.debug(outputRecordNames);
+        system.debug(outputCollection);
+
         for(sobject eachRecord : outputCollection){
-            IdValueMap.put(eachRecord.get('id')+'',eachRecord.get(valueFieldApiName)+'');
+            string value = '';
+            if(string.isNotBlank(valueFieldApiName)) value =eachRecord.get(valueFieldApiName)+'';
+            IdValueMap.put(eachRecord.get('id')+'',value);
         }
  
         integer i = 0;
@@ -48,7 +82,8 @@ public with sharing class AutoCompleteController {
             //If has a ValueFromNamedField
             string ValueFromNamedField = IdValueMap.get(eachId);
             if(string.isNotBlank(ValueFromNamedField) && ValueFromNamedField != eachResult.displayValue){ 
-                eachResult.displayValue +=  ' ('+IdValueMap.get(eachId)+')';
+                if(string.isnotblank(eachResult.displayValue )) eachResult.displayValue += ' ('+ValueFromNamedField+')';
+                else eachResult.displayValue += IdValueMap.get(eachId)+'';
             } 
 
             i++;

@@ -1,0 +1,37 @@
+.iconClass {
+    margin-right:10px;
+}
+.slds-media__body{
+    font-size: 0.8rem;
+    margin-top:0.4rem;
+}
+.slds-combobox_container, .slds-dropdown_fluid {
+    max-width: 800px;
+}
+.slds-dropdown_fluid{
+    min-height: 35px;
+}
+.slds-spinner{
+    min-height: 40px;
+    position: relative;
+    display:block;
+}
+.slds-button_brand{
+    margin: 10px 0px;
+}
+label.slds-form-element__label {
+    font-size: 0.8rem;
+    margin-bottom: 5px;
+}
+.CardPadding{
+    padding: 0px 20px!important;
+}
+header.slds-card__header.slds-grid {
+    display: none;
+}
+.slds-input__icon  {
+    position: absolute;
+    z-index: 1;
+    margin: 0.5% 0 0 20%;
+    top: 9px;
+}

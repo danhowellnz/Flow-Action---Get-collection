@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>48.0</apiVersion>
+    <isExposed>true</isExposed>
+    <masterLabel>Global Lookup LWC</masterLabel>
+    <description>Global Lookup</description>
+    <targets>
+        <target>lightning__AppPage</target>
+        <target>lightning__RecordPage</target>
+        <target>lightning__HomePage</target>
+        <target>lightning__FlowScreen</target>
+    </targets>
+    <!-- Configuring the design attributes --><targetConfigs>
+        <targetConfig targets="lightning__AppPage">
+            <property name="label" type="String" label="Label"/>
+            <property name="objectApiNameInput" type="String" label="Object Api Name" required="true" default=""/>
+            <property name="valueFieldApiName" type="String" label="Field to show in search (api name)"/>
+            <property name="extendedWhereClause" type="String" label="WhereClause"/>
+            <property name="maxRecords" type="integer" label="Max Number of Results To Show"/>
+            <property name="extraObjects" type="String" label="Extra Objects - comma seperated list"/>
+            <property name="searchScope" type="String" label="Search Scope: ALL FIELDS, NAME FIELDS, EMAIL FIELDS, PHONE FIELDS"/>
+            <property name="selectedOption" type="String" label="Output: RecordId"/>
+            <property name="queryType" type="String" label="Search or Select" default="Search"/>
+            <property name="inputFieldAPIName" type="String" label="Save Only: Field API Name to Save Result To"/>
+            <property name="StartingValue" type="String" label="Starting Search Value"/>
+            <property name="Bypasssharing" type="Boolean" label="Bypass Sharing"/>
+        </targetConfig>
+        <targetConfig targets="lightning__HomePage">
+            <property name="label" type="String" label="Label"/>
+            <property name="objectApiNameInput" type="String" label="Object Api Name" required="true" default=""/>
+            <property name="valueFieldApiName" type="String" label="Field to show in search (api name)"/>
+            <property name="extendedWhereClause" type="String" label="Where Clause"/>
+            <property name="maxRecords" type="integer" label="Max Number of Results To Show"/>
+            <property name="extraObjects" type="String" label="Extra Objects - comma seperated list"/>
+            <property name="searchScope" type="String" label="Search Scope: ALL FIELDS, NAME FIELDS, EMAIL FIELDS, PHONE FIELDS"/>
+            <property name="selectedOption" type="String" label="Output: RecordId"/>
+            <property name="queryType" type="String" label="Search or Select" default="Search"/>
+            <property name="inputFieldAPIName" type="String" label="Save Only: Field API Name to Save Result To"/>
+            <property name="StartingValue" type="String" label="Starting Search Value"/>
+            <property name="Bypasssharing" type="Boolean" label="Bypass Sharing"/>
+        </targetConfig>
+        <targetConfig targets="lightning__RecordPage">
+            <property name="label" type="String" label="Label"/>
+            <property name="objectApiNameInput" type="String" label="Object Api Name" required="true" default=""/>
+            <property name="valueFieldApiName" type="String" label="Field to show in search (api name)"/>
+            <property name="extendedWhereClause" type="String" label="Where Clause"/>
+            <property name="maxRecords" type="integer" label="Max Number of Results To Show"/>
+            <property name="extraObjects" type="String" label="Extra Objects - comma seperated list"/>
+            <property name="searchScope" type="String" label="Search Scope: ALL FIELDS, NAME FIELDS, EMAIL FIELDS, PHONE FIELDS"/>
+            <property name="selectedOption" type="String" label="Output: RecordId"/>
+            <property name="queryType" type="String" label="Search or Select" default="Search"/>
+            <property name="inputFieldAPIName" type="String" label="Save Only: Field API Name to Save Result To"/>
+            <property name="StartingValue" type="String" label="Starting Search Value"/>
+            <property name="Bypasssharing" type="Boolean" label="Bypass Sharing"/>
+        </targetConfig>
+        <targetConfig targets="lightning__FlowScreen">
+            <property name="label" type="String" label="2. Label"/>
+            <property name="objectApiNameInput" type="String" label="1. Object Api Name" required="true" default="Object API Name"/>
+            <property name="valueFieldApiName" type="String" label="3. Field to show in search (api name)"/>
+            <property name="extendedWhereClause" type="String" label="6. Where Clause"/>
+            <property name="maxRecords" type="integer" label="5. Max Number of Results To Show"/>
+            <property name="extraObjects" type="String" label="5. Extra Objects - comma seperated list"/>
+            <property name="searchScope" type="String" label="8. Search Scope: ALL FIELDS, NAME FIELDS, EMAIL FIELDS, PHONE FIELDS"/>
+            <property name="queryType" type="String" label="7. Search or Select" default="Search"/>
+            <property name="inputFieldAPIName" type="String" label="Save Only: Field API Name to Save Result To"/>
+            <property name="StartingValue" type="String" label="Starting Search Value"/>
+            <property name="FlowAction" type="String" label="Flow Action: Next,Back,Finish"/>
+            <property name="selectedOption" type="String" label="RecordId" />
+            <property name="Bypasssharing" type="Boolean" label="Bypass Sharing"/>
+        </targetConfig>
+    </targetConfigs>
+</LightningComponentBundle>
