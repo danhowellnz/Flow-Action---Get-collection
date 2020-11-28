@@ -12,8 +12,8 @@ It can use
 
 
 **Install**
-- Production: https://login.salesforce.com/packaging/installPackage.apexp?p0=04t7F000005EwuV
-- Sandbox: https://test.salesforce.com/packaging/installPackage.apexp?p0=04t7F000005EwuV
+- Production: https://login.salesforce.com/packaging/installPackage.apexp?p0=04t7F000005QzIG
+- Sandbox: https://test.salesforce.com/packaging/installPackage.apexp?p0=04t7F000005QzIG
 - Source code: https://github.com/danhowellnz/Flow-Action---Get-collection
 
 **How to use**
